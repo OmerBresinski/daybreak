@@ -9,10 +9,11 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "react": "^18.3.1",
-    "react-dom": "^18.3.1",
+    "@clerk/clerk-react": "^5.54.0",
     "@tanstack/react-query": "^5.62.8",
-    "hono": "^4.6.14"
+    "hono": "^4.6.14",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1"
   },
   "devDependencies": {
     "@daybreak/backend": "workspace:*",
