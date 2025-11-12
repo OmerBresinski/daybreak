@@ -11,6 +11,38 @@ const app = new Hono()
     return c.json({ status: 'ok', timestamp: new Date().toISOString() })
   })
 
+  // GET /api/events - Get all events
+  .get('/api/events', (c) => {
+    const events = [
+      {
+        id: 1,
+        name: 'Sarah & John Wedding',
+        date: '2025-06-15',
+        type: 'wedding' as const
+      },
+      {
+        id: 2,
+        name: 'Album Recording Session',
+        date: '2025-03-20',
+        type: 'studio recording' as const
+      },
+      {
+        id: 3,
+        name: 'Emily & David Wedding',
+        date: '2025-07-10',
+        type: 'wedding' as const
+      },
+      {
+        id: 4,
+        name: 'Podcast Episode 42',
+        date: '2025-02-28',
+        type: 'studio recording' as const
+      }
+    ]
+
+    return c.json(events)
+  })
+
 // Export the app type for RPC client
 export type AppType = typeof app
 
