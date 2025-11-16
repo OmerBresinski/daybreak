@@ -1,5 +1,11 @@
 import { hc } from 'hono/client'
 import type { AppType } from '@daybreak/backend'
 
+const API_URL = import.meta.env.VITE_API_URL
+
+if (!API_URL) {
+  throw new Error('Missing VITE_API_URL environment variable')
+}
+
 // Create the Hono RPC client with full type safety
-export const client = hc<AppType>('http://localhost:5173')
+export const client = hc<AppType>(API_URL)
