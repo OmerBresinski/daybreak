@@ -367,7 +367,6 @@ const app = new Hono()
       });
 
       const messages = response.data.messages || [];
-      const analyzedEmails = [];
 
       // Fetch and analyze each email
       for (const message of messages.slice(0, 10)) {
@@ -393,36 +392,10 @@ const app = new Hono()
         });
 
         // Analyze for booking inquiry using helper function
-        const analysis = analyzeEmailForBooking(subject, body);
-
-        console.log("🔍 Analysis:", {
-          isBookingInquiry: analysis.isBookingInquiry,
-          confidence: analysis.confidence,
-          matchedKeywords: analysis.matchedKeywords,
-        });
-
-        if (analysis.isBookingInquiry) {
-          console.log("✅ BOOKING INQUIRY DETECTED!");
-
-          analyzedEmails.push({
-            id: message.id,
-            from,
-            subject,
-            date,
-            snippet: emailData.data.snippet || "",
-            body: body.substring(0, 500), // First 500 chars
-            analysis: {
-              confidence: analysis.confidence,
-              matchedKeywords: analysis.matchedKeywords,
-            },
-          });
-        }
       }
 
       return c.json({
         total: messages.length,
-        analyzed: analyzedEmails.length,
-        emails: analyzedEmails,
       });
     } catch (error) {
       console.error("Error analyzing emails:", error);
