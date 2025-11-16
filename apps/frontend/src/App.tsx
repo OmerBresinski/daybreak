@@ -30,14 +30,37 @@ function App() {
         <h2
           style={{ fontSize: "1.5em", marginTop: "2rem", marginBottom: "1rem" }}
         >
-          Events
+          Calendar Events (Past Month)
         </h2>
 
-        {isLoading && <p>Loading events...</p>}
+        {isLoading && <p>Loading calendar events...</p>}
 
-        {error && <p style={{ color: "#ff6b6b" }}>Error: {error.message}</p>}
+        {error && (
+          <div
+            style={{
+              padding: "1rem",
+              backgroundColor: "#2a1a1a",
+              borderRadius: "8px",
+              border: "1px solid #ff6b6b",
+            }}
+          >
+            <p style={{ color: "#ff6b6b", marginBottom: "0.5rem" }}>
+              Error: {error.message}
+            </p>
+            <p style={{ color: "#888", fontSize: "0.9em" }}>
+              Make sure you've connected your Google account in your user
+              settings and granted calendar access.
+            </p>
+          </div>
+        )}
 
-        {events && (
+        {events && events.length === 0 && (
+          <p style={{ color: "#888" }}>
+            No calendar events found in the past month.
+          </p>
+        )}
+
+        {events && events.length > 0 && (
           <div style={{ display: "grid", gap: "1rem" }}>
             {events.map((event) => (
               <div
@@ -53,11 +76,24 @@ function App() {
                   {event.name}
                 </h3>
                 <p style={{ color: "#888", margin: "0.25rem 0" }}>
-                  Type: {event.type}
+                  📅 {new Date(event.date).toLocaleString()}
                 </p>
-                <p style={{ color: "#888", margin: "0.25rem 0" }}>
-                  Date: {new Date(event.date).toLocaleDateString()}
-                </p>
+                {event.location && (
+                  <p style={{ color: "#888", margin: "0.25rem 0" }}>
+                    📍 {event.location}
+                  </p>
+                )}
+                {event.description && (
+                  <p
+                    style={{
+                      color: "#999",
+                      margin: "0.5rem 0 0 0",
+                      fontSize: "0.9em",
+                    }}
+                  >
+                    {event.description}
+                  </p>
+                )}
               </div>
             ))}
           </div>
