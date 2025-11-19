@@ -67,7 +67,7 @@ const app = new Hono()
   .post("/api/webhooks/gmail", async (c) => {
     try {
       const body = await c.req.json();
-      console.log("Gmail webhook received:", body);
+      console.log("📬 Gmail webhook received:", body);
 
       // Decode the Pub/Sub message
       if (body.message?.data) {
@@ -76,32 +76,67 @@ const app = new Hono()
         );
         const notification = JSON.parse(decodedData);
 
-        console.log("Gmail notification:", notification);
+        console.log("📨 Gmail notification:", notification);
 
         // notification contains: { emailAddress, historyId }
         const { emailAddress, historyId } = notification;
 
-        // TODO: Look up Clerk user ID from emailAddress in database
-        // TODO: Get user's OAuth token using Clerk API
-        // For now, we'll process what we can without user context
-
         console.log(
-          `New email notification for ${emailAddress}, historyId: ${historyId}`
+          `\n🔔 New email notification for ${emailAddress}, historyId: ${historyId}`
         );
 
-        // NOTE: To fetch and analyze emails, we need:
-        // 1. A database mapping emailAddress -> Clerk userId
-        // 2. Retrieve the user's OAuth token
-        // 3. Use Gmail API to fetch history since last processed historyId
-        // 4. Analyze new messages for booking inquiries
-        // 5. Store/alert based on findings
+        // TODO: Implement database lookup and email fetching
+        // For now, this is a placeholder showing what needs to happen:
 
-        // Example of what the processing would look like:
-        // const userId = await getUserIdByEmail(emailAddress)
-        // const token = await getOAuthToken(userId)
-        // const newMessages = await fetchGmailHistory(token, historyId)
-        // const bookingInquiries = analyzeForBookings(newMessages)
-        // await storeBookingInquiries(bookingInquiries)
+        // Step 1: Look up user in database
+        // const userRecord = await db.getUserByGmailAddress(emailAddress)
+        // if (!userRecord) {
+        //   console.log('No user found for email:', emailAddress)
+        //   return c.json({ success: true })
+        // }
+
+        // Step 2: Get user's OAuth token from Clerk
+        // const clerkClient = c.get('clerk')
+        // const tokenResponse = await clerkClient.users.getUserOauthAccessToken(
+        //   userRecord.clerkUserId,
+        //   'oauth_google'
+        // )
+        // const accessToken = tokenResponse.data[0].token
+
+        // Step 3: Set up Gmail client
+        // const oauth2Client = new google.auth.OAuth2()
+        // oauth2Client.setCredentials({ access_token: accessToken })
+        // const gmail = google.gmail({ version: 'v1', auth: oauth2Client })
+
+        // Step 4: Fetch new messages
+        // const newMessages = await fetchGmailHistory(gmail, historyId)
+        // console.log(`📨 Found ${newMessages.length} new messages`)
+
+        // Step 5: Log each email's content
+        // for (const msg of newMessages) {
+        //   const emailData = await gmail.users.messages.get({
+        //     userId: 'me',
+        //     id: msg.id,
+        //     format: 'full',
+        //   })
+        //
+        //   const headers = emailData.data.payload?.headers || []
+        //   const subject = headers.find((h) => h.name === 'Subject')?.value || ''
+        //   const from = headers.find((h) => h.name === 'From')?.value || ''
+        //   const date = headers.find((h) => h.name === 'Date')?.value || ''
+        //   const body = extractEmailBody(emailData.data.payload)
+        //
+        //   console.log('\n📧 New Email via Webhook:', {
+        //     from,
+        //     subject,
+        //     date,
+        //     body: body.substring(0, 500)
+        //   })
+        // }
+
+        console.log(
+          "\n⚠️  Database required: Cannot fetch emails without user credentials mapping"
+        );
       }
 
       // Always return 200 to acknowledge receipt
