@@ -1,72 +1,81 @@
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { useAuth } from '@clerk/clerk-react'
-import { client } from '@/lib/api'
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useAuth } from "@clerk/clerk-react";
+import { client } from "@/lib/api";
 
 // Fetch functions exported for prefetching
 export const fetchOrganizations = async () => {
-  const res = await client.api.organizations.$get()
-  if (!res.ok) throw new Error('Failed to fetch organizations')
-  return res.json()
-}
+  const res = await client.api.organizations.$get();
+  if (!res.ok) throw new Error("Failed to fetch organizations");
+  return res.json();
+};
 
 export const fetchOrganization = async (id: string) => {
-  const res = await client.api.organizations[':id'].$get({
-    param: { id }
-  })
-  if (!res.ok) throw new Error('Failed to fetch organization')
-  return res.json()
-}
+  const res = await client.api.organizations[":id"].$get({
+    param: { id },
+  });
+  if (!res.ok) throw new Error("Failed to fetch organization");
+  return res.json();
+};
 
 export function useOrganizations() {
-  const { isSignedIn } = useAuth()
-  
+  const { isSignedIn } = useAuth();
+
   return useQuery({
-    queryKey: ['organizations'],
+    queryKey: ["organizations"],
     queryFn: fetchOrganizations,
     enabled: isSignedIn,
-  })
+  });
 }
 
 export function useCreateOrganization() {
-  const queryClient = useQueryClient()
+  const queryClient = useQueryClient();
 
   return useMutation({
     mutationFn: async (name: string) => {
       const res = await client.api.organizations.$post({
-        json: { name }
-      })
-      if (!res.ok) throw new Error('Failed to create organization')
-      return res.json()
+        json: { name },
+      });
+      if (!res.ok) throw new Error("Failed to create organization");
+      return res.json();
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['organizations'] })
-    }
-  })
+      queryClient.invalidateQueries({ queryKey: ["organizations"] });
+    },
+  });
 }
 
-export function useOrganization(id: string) {
-  const { isSignedIn } = useAuth()
+export function useOrganization(
+  id: string,
+  options?: {
+    refetchInterval?:
+      | number
+      | false
+      | ((query: any) => number | false | undefined);
+  }
+) {
+  const { isSignedIn } = useAuth();
 
   return useQuery({
-    queryKey: ['organizations', id],
+    queryKey: ["organizations", id],
     queryFn: () => fetchOrganization(id),
     enabled: !!id && isSignedIn,
-  })
+    refetchInterval: options?.refetchInterval,
+  });
 }
 
 export function useDeleteOrganization() {
-  const queryClient = useQueryClient()
+  const queryClient = useQueryClient();
 
   return useMutation({
     mutationFn: async (id: string) => {
-      const res = await client.api.organizations[':id'].$delete({
-        param: { id }
-      })
-      if (!res.ok) throw new Error('Failed to delete organization')
-      return res.json()
+      const res = await client.api.organizations[":id"].$delete({
+        param: { id },
+      });
+      if (!res.ok) throw new Error("Failed to delete organization");
+      return res.json();
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['organizations'] })
-    }
-  })
+      queryClient.invalidateQueries({ queryKey: ["organizations"] });
+    },
+  });
 }
