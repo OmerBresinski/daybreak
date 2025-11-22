@@ -1,14 +1,22 @@
-import React from 'react'
-import { createBrowserRouter, Outlet } from "react-router-dom"
-import RootLayout from "./components/RootLayout"
-import App from "./App"
+import React from "react";
+import { createBrowserRouter } from "react-router-dom";
+import RootLayout from "./components/RootLayout";
+import App from "./App";
 
 // Lazy load pages for performance
-const OrganizationsPage = React.lazy(() => import("@/pages/organizations/OrganizationsPage"))
-const OrganizationDetailPage = React.lazy(() => import("@/pages/organizations/OrganizationDetailPage"))
-const InviteLandingPage = React.lazy(() => import("@/pages/invite-landing/InviteLandingPage"))
+const OrganizationsPage = React.lazy(
+  () => import("@/pages/organizations/OrganizationsPage")
+);
+const OrganizationDetailPage = React.lazy(
+  () => import("@/pages/organizations/OrganizationDetailPage")
+);
+const InviteLandingPage = React.lazy(
+  () => import("@/pages/invite-landing/InviteLandingPage")
+);
 
-const LoadingFallback = () => <div className="p-6 text-center text-muted-foreground">Loading...</div>
+const LoadingFallback = () => (
+  <div className="p-6 text-center text-muted-foreground">Loading...</div>
+);
 
 export const router = createBrowserRouter([
   {
@@ -31,14 +39,14 @@ export const router = createBrowserRouter([
             ),
           },
           {
-             path: ":id",
-             element: (
+            path: ":id",
+            element: (
               <React.Suspense fallback={<LoadingFallback />}>
                 <OrganizationDetailPage />
               </React.Suspense>
-             )
-          }
-        ]
+            ),
+          },
+        ],
       },
     ],
   },
@@ -49,5 +57,5 @@ export const router = createBrowserRouter([
         <InviteLandingPage />
       </React.Suspense>
     ),
-  }
+  },
 ]);
