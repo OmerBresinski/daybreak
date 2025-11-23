@@ -1,4 +1,5 @@
 @import "tailwindcss";
+@source "../node_modules/@omerbres/react-simple-calendar";
 @import "tw-animate-css";
 
 @custom-variant dark (&:is(.dark *));

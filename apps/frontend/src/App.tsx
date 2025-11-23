@@ -1,15 +1,78 @@
 import { SignedIn, SignedOut } from "@clerk/clerk-react";
 import { useEvents } from "@/hooks/useEvents";
 import { useGmailWatch } from "@/hooks/useGmailWatch";
-import { Card, CardContent, CardHeader, CardTitle } from "@/ui/card";
+import { Calendar } from "@omerbres/react-simple-calendar";
 import { Skeleton } from "@/ui/skeleton";
-import { CalendarDays, MapPin } from "lucide-react";
+import { useMemo } from "react";
+
+// Helper to map Google Calendar color IDs to hex codes or Tailwind classes
+// These are standard Google Calendar colors
+const GOOGLE_CALENDAR_COLORS: Record<string, string> = {
+  "1": "#7986cb", // Lavender
+  "2": "#33b679", // Sage
+  "3": "#8e24aa", // Grape
+  "4": "#e67c73", // Flamingo
+  "5": "#f6c026", // Banana
+  "6": "#f5511d", // Tangerine
+  "7": "#039be5", // Peacock
+  "8": "#616161", // Graphite
+  "9": "#3f51b5", // Blueberry
+  "10": "#0b8043", // Basil
+  "11": "#d60000", // Tomato
+};
+
+// Fallback palette if no colorId is present
+const FALLBACK_COLORS = [
+  "#3b82f6", // blue-500
+  "#ef4444", // red-500
+  "#10b981", // emerald-500
+  "#f59e0b", // amber-500
+  "#8b5cf6", // violet-500
+  "#ec4899", // pink-500
+  "#06b6d4", // cyan-500
+];
 
 function App() {
   const { data: events, isLoading, error } = useEvents();
 
   // Automatically set up Gmail watch when user signs in
   useGmailWatch();
+
+  const formattedEvents = useMemo(() => {
+    if (!events) return [];
+    return events.map((event: any) => {
+      // Ensure we have valid dates. If end date is missing, default to start + 1 hour
+      const start = new Date(event.start || event.date);
+      let end = new Date(event.end || event.start || event.date);
+
+      if (end.getTime() === start.getTime()) {
+        end = new Date(start.getTime() + 60 * 60 * 1000);
+      }
+
+      // Determine color: use Google's colorId if available, otherwise hash title for a consistent fallback
+      let color = event.color ? GOOGLE_CALENDAR_COLORS[event.color] : undefined;
+
+      if (!color) {
+        // Simple hash of the title to pick a consistent color from fallback palette
+        const hash = (event.title || "")
+          .split("")
+          .reduce((acc: number, char: string) => {
+            return char.charCodeAt(0) + ((acc << 5) - acc);
+          }, 0);
+        const index = Math.abs(hash) % FALLBACK_COLORS.length;
+        color = FALLBACK_COLORS[index];
+      }
+
+      return {
+        id: event.id,
+        title: event.title || event.name || "Untitled Event",
+        start,
+        end,
+        description: event.description,
+        color,
+      };
+    });
+  }, [events]);
 
   return (
     <div className="space-y-6">
@@ -27,18 +90,8 @@ function App() {
           </h2>
 
           {isLoading && (
-            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-              {[1, 2, 3].map((i) => (
-                <Card key={i}>
-                  <CardHeader>
-                    <Skeleton className="h-6 w-2/3" />
-                  </CardHeader>
-                  <CardContent className="space-y-2">
-                    <Skeleton className="h-4 w-1/2" />
-                    <Skeleton className="h-16 w-full" />
-                  </CardContent>
-                </Card>
-              ))}
+            <div className="space-y-4">
+              <Skeleton className="h-[500px] w-full rounded-md border" />
             </div>
           )}
 
@@ -58,52 +111,9 @@ function App() {
             </p>
           )}
 
-          {!isLoading && events && events.length > 0 && (
-            <div className="grid gap-3 grid-cols-2 md:grid-cols-4 lg:grid-cols-5">
-              {events.map((event: any) => (
-                <Card
-                  key={event.id}
-                  className="py-3 px-3 gap-1.5 bg-secondary/20 hover:bg-secondary/40 border border-border/50 shadow-sm hover:shadow-md transition-all"
-                >
-                  <CardHeader className="p-0 gap-0">
-                    <CardTitle
-                      className="text-sm font-bold leading-tight truncate text-foreground/90"
-                      title={event.name}
-                    >
-                      {event.name}
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent className="p-0 space-y-1.5 text-xs">
-                    <div className="flex items-center font-bold text-primary/90 mt-0.5">
-                      <CalendarDays className="mr-1.5 h-3.5 w-3.5 flex-shrink-0" />
-                      <span className="truncate">
-                        {new Date(event.date).toLocaleDateString(undefined, {
-                          month: "short",
-                          day: "numeric",
-                          hour: "numeric",
-                          minute: "2-digit",
-                        })}
-                      </span>
-                    </div>
-                    {event.location && (
-                      <div
-                        className="flex items-center text-muted-foreground truncate"
-                        title={event.location}
-                      >
-                        <MapPin className="mr-1.5 h-3 w-3 opacity-70 flex-shrink-0" />
-                        <span className="truncate font-medium">
-                          {event.location}
-                        </span>
-                      </div>
-                    )}
-                    {event.description && (
-                      <div className="mt-1.5 text-[10px] leading-tight text-muted-foreground/80 line-clamp-2 font-medium">
-                        {event.description}
-                      </div>
-                    )}
-                  </CardContent>
-                </Card>
-              ))}
+          {!isLoading && formattedEvents.length > 0 && (
+            <div className="h-[600px] w-full border rounded-md bg-background">
+              <Calendar events={formattedEvents} />
             </div>
           )}
         </div>
